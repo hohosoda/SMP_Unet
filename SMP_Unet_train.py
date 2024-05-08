@@ -15,7 +15,7 @@ import numpy as np
 from tqdm import tqdm
 
 # 訓練資料路徑
-label_path = r'/work/u5914116/ki67/ex14/label_3class'
+label_path = r'/work/u5914116/ki67/ex14/label'
 patch_path = r'/work/u5914116/ki67/ex14/patch'
 
 # Pretrained weight
