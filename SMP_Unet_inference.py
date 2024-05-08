@@ -97,8 +97,8 @@ boundary_seg_model = smp.Unet(encoder_name="resnet50",
 
 color_seg_model.to(device)
 boundary_seg_model.to(device)
-color_seg_model.load_state_dict(torch.load(color_seg_weights,map_location=torch.device('cpu')))
-boundary_seg_model.load_state_dict(torch.load(boundary_seg_weights,map_location=torch.device('cpu')))
+color_seg_model.load_state_dict(torch.load(color_seg_weights))
+boundary_seg_model.load_state_dict(torch.load(boundary_seg_weights))
 
 # 主程式（示例）
 if __name__ == "__main__":    
