@@ -22,9 +22,9 @@ DATA/
 |   |   |-- perdict
 ```
 3. Model Structure
-```
+
 ![image] (https://github.com/r08543063/SMP_Unet/blob/main/model.PNG)
-```
+
 5. Train the model
 ```
 cd code
