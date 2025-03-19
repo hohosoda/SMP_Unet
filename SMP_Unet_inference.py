@@ -43,7 +43,7 @@ class CustomDataset(Dataset):
 
 # 轉換
 transform1 = transforms.Compose([
-    transforms.Resize((512, 512)),  # Resize the image to 512x512 pixels
+    transforms.Resize((512, 512)),
     transforms.ToTensor()
     ])
 
@@ -70,7 +70,7 @@ def predict(model, loader, save_dir="prediction"):
             image_norm, img_name  = package[0], package[1]
             #image_norm = image_norm.cuda()
             outputs = model(image_norm)
-            masks = torch.argmax(outputs, dim=1)  # Convert probabilities to predictions
+            masks = torch.argmax(outputs, dim=1)
             image_norm, masks = (image_norm.squeeze(0)).permute(1,2,0), masks.squeeze(0)
             #image_norm, masks = image_norm.cpu(), masks.cpu()
             image_norm, masks = image_norm.numpy(), masks.numpy()
@@ -100,7 +100,7 @@ boundary_seg_model.to(device)
 color_seg_model.load_state_dict(torch.load(color_seg_weights))
 boundary_seg_model.load_state_dict(torch.load(boundary_seg_weights))
 
-# 主程式（示例）
+# 主程式
 if __name__ == "__main__":    
     # 進行預測
     predict(color_seg_model, inference_loader, save_dir=color_seg_output)
