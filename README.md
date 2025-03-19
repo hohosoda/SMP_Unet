@@ -21,16 +21,16 @@ DATA/
 |   |   |-- patch
 |   |   |-- perdict
 ```
-3. Model Structure
+2. Model Structure
 
 ![image](https://github.com/r08543063/SMP_Unet/blob/main/model.PNG)
 
-5. Train the model
+3. Train the model
 ```
 cd code
 python SMP_Unet_train.py
 ```
-5. Inference
+4. Inference
 ```
 cd code
 python SMP_Unet_inference.py
