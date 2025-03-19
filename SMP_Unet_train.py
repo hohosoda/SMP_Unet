@@ -50,14 +50,14 @@ class CustomDataset(Dataset):
 
 # 轉換
 transform1 = transforms.Compose([
-    transforms.Resize((512, 512)),  # Resize the image to 256x256 pixels
+    transforms.Resize((512, 512)),
     transforms.ColorJitter(brightness=(0.3,1),
                            hue=(-0.1,0)),
     transforms.ToTensor(),
 ])
 
 transform2 = transforms.Compose([
-    transforms.Resize((512, 512)),  # Resize the image to 512x512 pixels
+    transforms.Resize((512, 512)),
     transforms.Grayscale(),
     transforms.ToTensor(),
     ])
@@ -136,7 +136,7 @@ model_border.load_state_dict(torch.load(color_seg_weights))
 
 # 損失函數和優化器
 def Weight_Dice_loss(predicted, target, num_classes=3, smooth=1e-6):
-    smooth = 1e-6  # 平滑因子，用于避免分母为0
+    smooth = 1e-6
     losses = []
 
     for class_index in range(num_classes):
@@ -150,11 +150,10 @@ def Weight_Dice_loss(predicted, target, num_classes=3, smooth=1e-6):
         intersection = torch.sum(predicted_class * target_class) # 以batch為單位計算交集
         union = torch.sum(predicted_class) + torch.sum(target_class) # 以batch為單位計算集
         dice = (2.0 * intersection) / (union + smooth)
-        #weight = (262144 * batch_size - (torch.sum(predicted_class))) / (262144 * batch_size)
         dice_loss = 1.0 - dice
         losses.append(dice_loss)
 
-    loss = sum(losses) / num_classes  # 计算所有类别的Weight Dice Loss
+    loss = sum(losses) / num_classes
 
     return loss
 
@@ -164,8 +163,8 @@ def Weight_CE_loss(predicted, target, num_classes=3, smooth=1e-6):
     losses = []
 
     for class_index in range(num_classes):
-        predicted_class = predicted[:, class_index]  # 取出对应类别的预测结果 size = (batch,512,512) 
-        target_class = (target == class_index).float()  # 创建对应类别的目标张量 size = (batch,1,512,512)
+        predicted_class = predicted[:, class_index]
+        target_class = (target == class_index).float()
         batch_size = predicted_class.size(0)
 
         predicted_class = predicted_class.view(predicted_class.size(0), -1) # flatten(512x512 => 262144)
@@ -177,12 +176,10 @@ def Weight_CE_loss(predicted, target, num_classes=3, smooth=1e-6):
         scale_2 = predicted_class ** gamma
         term_1  = torch.sum(scale_1 * target_class * pred_log) / (262144 * batch_size)
         term_2 = torch.sum(scale_2 * (1 - target_class) * comp_pred_log) / (262144 * batch_size)
-        #weight_2 = torch.sum(predicted_class) / (262144 * batch_size)
-        #weight_1 = 1 - weight_2
         loss = term_1 + term_2
         losses.append(loss)
 
-    loss = - (sum(losses) / num_classes)  # 计算所有类别的Weight Dice Loss
+    loss = - (sum(losses) / num_classes)
 
     return loss
 
@@ -192,11 +189,11 @@ optimizer_border = torch.optim.Adam(model_border.parameters(), lr=1e-4)
 
 # 訓練函式
 def train_model(model_1, model_2, optimizer_1, optimizer_2, train_loader, val_loader, num_epochs=25, n_classes=3):
-    best_miou_1, best_miou_2 = 0.0, 0.0  # Initialize the best MIoU score
-    best_weights_1, best_weights_2 = None, None  # Variable to store the best weights
+    best_miou_1, best_miou_2 = 0.0, 0.0
+    best_weights_1, best_weights_2 = None, None
 
     for epoch in range(num_epochs):
-        model_1.train()  # Set model to training mode
+        model_1.train()
         model_2.train()
         running_loss_1, running_loss_2 = 0.0, 0.0
         count = 0
@@ -264,7 +261,7 @@ def miou_score(pred, target, smooth=1e-6, n_classes=3):
     :param n_classes: the number of classes in the dataset
     :return: the MIoU score
     """
-    pred = torch.argmax(pred, dim=1)  # Convert probabilities to class predictions size = (batch,512,512)
+    pred = torch.argmax(pred, dim=1)
     miou_total = 0.0
     for class_id in range(n_classes):
         true_positive = ((pred == class_id) & (target == class_id)).sum()
@@ -300,7 +297,7 @@ def predict(model, loader, save_dir="predicted_masks"):
             images = package[0]
             images = images.cuda()
             outputs = model(images)
-            masks = torch.argmax(outputs, dim=1)  # Convert probabilities to predictions
+            masks = torch.argmax(outputs, dim=1)
             
             r_channel = (torch.where(masks == 1,
                                torch.tensor(255,dtype=torch.uint8,device = 'cuda'),
@@ -323,7 +320,7 @@ def predict(model, loader, save_dir="predicted_masks"):
             for j, pred in enumerate(preds):
                 save_image(pred.float(), os.path.join(save_dir, f"predict_{idx * loader.batch_size + j}.png"))
 
-# 主程式（示例）
+# 主程式
 if __name__ == "__main__":
 
     model_color, model_border = train_model(model_color, model_border, optimizer_color, optimizer_border,
@@ -331,7 +328,6 @@ if __name__ == "__main__":
                                             val_loader,
                                             num_epochs=30)
     
-    # 逕行測試與預測
     test_MIoU_color, test_MIoU_border = evaluate_model(model_color, model_border, test_loader)
     print(f"test Color / Border MIoU: {test_MIoU_color} / {test_MIoU_border}")
     predict(model_color, test_loader, save_dir="color_predicted_masks")
